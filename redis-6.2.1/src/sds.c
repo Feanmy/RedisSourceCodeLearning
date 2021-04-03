@@ -41,7 +41,7 @@
 
 const char *SDS_NOINIT = "SDS_NOINIT";
 
-static inline int sdsHdrSize(char type) {
+static inline int sdsHdrSize(char type) {  /* 返回sds结构体大小 */
     switch(type&SDS_TYPE_MASK) {
         case SDS_TYPE_5:
             return sizeof(struct sdshdr5);
@@ -57,7 +57,7 @@ static inline int sdsHdrSize(char type) {
     return 0;
 }
 
-static inline char sdsReqType(size_t string_size) {
+static inline char sdsReqType(size_t string_size) {  /* 返回类型 */
     if (string_size < 1<<5)
         return SDS_TYPE_5;
     if (string_size < 1<<8)
@@ -100,15 +100,15 @@ static inline size_t sdsTypeMaxSize(char type) {
  * You can print the string with printf() as there is an implicit \0 at the
  * end of the string. However the string is binary safe and can contain
  * \0 characters in the middle, as the length is stored in the sds header. */
-sds _sdsnewlen(const void *init, size_t initlen, int trymalloc) {
+sds _sdsnewlen(const void *init, size_t initlen, int trymalloc) {  /* 创建一个新的sds对象 */
     void *sh;
     sds s;
     char type = sdsReqType(initlen);
     /* Empty strings are usually created in order to append. Use type 8
      * since type 5 is not good at this. */
-    if (type == SDS_TYPE_5 && initlen == 0) type = SDS_TYPE_8;
+    if (type == SDS_TYPE_5 && initlen == 0) type = SDS_TYPE_8;  /* 如果是sds_type_5，就转为sds_type_8 */
     int hdrlen = sdsHdrSize(type);
-    unsigned char *fp; /* flags pointer. */
+    unsigned char *fp; /* flags pointer. 指向flags的指针*/
     size_t usable;
 
     assert(initlen + hdrlen + 1 > initlen); /* Catch size_t overflow */
@@ -219,7 +219,7 @@ void sdsupdatelen(sds s) {
  * However all the existing buffer is not discarded but set as free space
  * so that next append operations will not require allocations up to the
  * number of bytes previously available. */
-void sdsclear(sds s) {
+void sdsclear(sds s) {  /* 清空sds */
     sdssetlen(s, 0);
     s[0] = '\0';
 }
@@ -230,7 +230,7 @@ void sdsclear(sds s) {
  *
  * Note: this does not change the *length* of the sds string as returned
  * by sdslen(), but only the free buffer space we have. */
-sds sdsMakeRoomFor(sds s, size_t addlen) {
+sds sdsMakeRoomFor(sds s, size_t addlen) {  /* 空间扩容 */
     void *sh, *newsh;
     size_t avail = sdsavail(s);
     size_t len, newlen;
@@ -239,7 +239,7 @@ sds sdsMakeRoomFor(sds s, size_t addlen) {
     size_t usable;
 
     /* Return ASAP if there is enough space left. */
-    if (avail >= addlen) return s; /* 先判断可用空间是否大于等于追加后的新长度 */
+    if (avail >= addlen) return s; /* 先判断可用空间是否大于等于追加后的新长度 如果>=直接返回 */
 
     len = sdslen(s);
     sh = (char*)s-sdsHdrSize(oldtype);
@@ -248,26 +248,28 @@ sds sdsMakeRoomFor(sds s, size_t addlen) {
     
     /* 如果新长度小于SDS_MAX_PREALLOC 空间扩大1倍，否则增大1024*1024 1M=1024*1024b */
     if (newlen < SDS_MAX_PREALLOC)
-        newlen *= 2;
+        newlen *= 2; /* 如果小于1M，就按新长度扩大1倍 */
     else
-        newlen += SDS_MAX_PREALLOC;
+        newlen += SDS_MAX_PREALLOC; /* 如果新长度>=1M，就在新长度的基础上再多分配1M的空间 */
 
-    type = sdsReqType(newlen);
+    type = sdsReqType(newlen); /* 根据新长度获取类型 */
 
     /* Don't use type 5: the user is appending to the string and type 5 is
      * not able to remember empty space, so sdsMakeRoomFor() must be called
      * at every appending operation. */
-    if (type == SDS_TYPE_5) type = SDS_TYPE_8;
+    if (type == SDS_TYPE_5) type = SDS_TYPE_8; /* 如果是sds_type_5就转为sds_type_8 */
 
     hdrlen = sdsHdrSize(type);
     assert(hdrlen + newlen + 1 > len);  /* Catch size_t overflow */
     if (oldtype==type) {
+        /* 类型相同，进行追加 */
         newsh = s_realloc_usable(sh, hdrlen+newlen+1, &usable);
         if (newsh == NULL) return NULL;
         s = (char*)newsh+hdrlen;
     } else {
         /* Since the header size changes, need to move the string forward,
          * and can't use realloc */
+        /* 类型不同，重新分配内存空间 */
         newsh = s_malloc_usable(hdrlen+newlen+1, &usable);
         if (newsh == NULL) return NULL;
         memcpy((char*)newsh+hdrlen, s, len+1);

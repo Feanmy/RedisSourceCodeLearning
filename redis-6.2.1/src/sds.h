@@ -54,7 +54,7 @@ struct __attribute__ ((__packed__)) sdshdr5 {
     char buf[]; // buf是个柔性数组
 };
 
-/* 以下结构体的相同点：flag都是低3位存储类型，高5位保留不使用
+/* 以下结构体的相同点：flags都是低3位存储类型，高5位保留不使用
  * 不同点：len和alloc的类型不同 */
 struct __attribute__ ((__packed__)) sdshdr8 {  /* packed作用是字节对齐：按1字节对齐 */
     uint8_t len; /* used 已使用长度 */
@@ -95,7 +95,7 @@ struct __attribute__ ((__packed__)) sdshdr64 {
 
 static inline size_t sdslen(const sds s) { /* 获取s的长度 s是直接指向柔性数组buf的 */
     unsigned char flags = s[-1];  /* 这个s[-1]是个什么玩意? */
-    /* 初步理解：s是指向buf数组，s[-1]是指向buf之前的flag(通过flag的低3位可以拿到类型) */
+    /* 初步理解：s是指向buf数组，s[-1]是指向buf之前的flags(通过flags的低3位可以拿到类型) */
     switch(flags&SDS_TYPE_MASK) {
         case SDS_TYPE_5:
             return SDS_TYPE_5_LEN(flags);
@@ -111,15 +111,15 @@ static inline size_t sdslen(const sds s) { /* 获取s的长度 s是直接指向�
     return 0;
 }
 
-static inline size_t sdsavail(const sds s) {  /* 获取剩余空间 */
+static inline size_t sdsavail(const sds s) {  /* 获取可用空间 */
     unsigned char flags = s[-1];
     switch(flags&SDS_TYPE_MASK) {
         case SDS_TYPE_5: {
             return 0;
         }
         case SDS_TYPE_8: {
-            SDS_HDR_VAR(8,s);
-            return sh->alloc - sh->len;
+            SDS_HDR_VAR(8,s);  /* 这一步暂时看不懂 */
+            return sh->alloc - sh->len;  /* 可用空间=分配空间-已使用空间 */
         }
         case SDS_TYPE_16: {
             SDS_HDR_VAR(16,s);
@@ -137,7 +137,7 @@ static inline size_t sdsavail(const sds s) {  /* 获取剩余空间 */
     return 0;
 }
 
-static inline void sdssetlen(sds s, size_t newlen) {
+static inline void sdssetlen(sds s, size_t newlen) {  /* 更新len字段 */
     unsigned char flags = s[-1];
     switch(flags&SDS_TYPE_MASK) {
         case SDS_TYPE_5:
@@ -161,7 +161,7 @@ static inline void sdssetlen(sds s, size_t newlen) {
     }
 }
 
-static inline void sdsinclen(sds s, size_t inc) {
+static inline void sdsinclen(sds s, size_t inc) { /* 增加len */
     unsigned char flags = s[-1];
     switch(flags&SDS_TYPE_MASK) {
         case SDS_TYPE_5:
@@ -187,7 +187,7 @@ static inline void sdsinclen(sds s, size_t inc) {
 }
 
 /* sdsalloc() = sdsavail() + sdslen() */
-static inline size_t sdsalloc(const sds s) {
+static inline size_t sdsalloc(const sds s) {  /* 返回分配空间大小 */
     unsigned char flags = s[-1];
     switch(flags&SDS_TYPE_MASK) {
         case SDS_TYPE_5:
@@ -204,7 +204,7 @@ static inline size_t sdsalloc(const sds s) {
     return 0;
 }
 
-static inline void sdssetalloc(sds s, size_t newlen) {
+static inline void sdssetalloc(sds s, size_t newlen) {  /* 设置新的分配空间大小 */
     unsigned char flags = s[-1];
     switch(flags&SDS_TYPE_MASK) {
         case SDS_TYPE_5:
@@ -225,6 +225,8 @@ static inline void sdssetalloc(sds s, size_t newlen) {
     }
 }
 
+
+/* 定义方法 */
 sds sdsnewlen(const void *init, size_t initlen);
 sds sdstrynewlen(const void *init, size_t initlen);
 sds sdsnew(const char *init);
