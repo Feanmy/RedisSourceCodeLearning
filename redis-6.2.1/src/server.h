@@ -669,6 +669,7 @@ typedef struct RedisModuleDigest {
 typedef struct redisObject {
     unsigned type:4;
     unsigned encoding:4;
+    /* lru字段记录数据最近一次被访问的时间戳，用作缓存淘汰 */
     unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or
                             * LFU data (least significant 8 bits frequency
                             * and most significant 16 bits access time). */
