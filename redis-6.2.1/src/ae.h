@@ -100,7 +100,7 @@ typedef struct aeEventLoop {
     int maxfd;   /* 允许打开的最大文件描述符 highest file descriptor currently registered */
     int setsize; /* max number of file descriptors tracked */
     long long timeEventNextId;
-    aeFileEvent *events; /* 储存已经注册的文件事件  Registered events */
+    aeFileEvent *events; /* 储存已经注册的文件事件数组，索引是socket文件描述符  Registered events */
     aeFiredEvent *fired; /* 储存已经触发的文件事件  Fired events */
     aeTimeEvent *timeEventHead; /* 储存时间事件链表 */
     int stop;  /* 标志事件循环是否结束 */
