@@ -667,15 +667,15 @@ typedef struct RedisModuleDigest {
 
 /* redis对象 */
 typedef struct redisObject {
-    unsigned type:4;
-    unsigned encoding:4;
+    unsigned type:4;     /* 类型     */
+    unsigned encoding:4; /* 内部编码 */
     /* 24位 lru字段记录数据最近一次被访问的时间戳，用作缓存淘汰 */
     /* 如果是LFU淘汰策略，前16位存储访问时间，后8位储存访问次数 */
     unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or
                             * LFU data (least significant 8 bits frequency
                             * and most significant 16 bits access time). */
     int refcount;  /* 引用计数 */
-    void *ptr;
+    void *ptr;     /* 数据指针 */
 } robj;
 
 /* The a string name for an object's type as listed above
@@ -701,7 +701,7 @@ struct evictionPoolEntry; /* Defined in evict.c */
 typedef struct clientReplyBlock {
     size_t size, used;
     char buf[];
-} clientReplyBlock;
+} clientReplyBlock;  /* 客户端输出缓冲区 */
 
 /* Redis database representation. There are multiple databases identified
  * by integers from 0 (the default database) up to the max configured
@@ -1159,11 +1159,12 @@ typedef enum childInfoType {
     CHILD_INFO_TYPE_MODULE_COW_SIZE
 } childInfoType;
 
+/* Redis服务端结构体 */
 struct redisServer {
     /* General */
-    pid_t pid;                  /* Main process pid. */
-    pthread_t main_thread_id;         /* Main thread id */
-    char *configfile;           /* Absolute config file path, or NULL */
+    pid_t pid;                  /* 进程id Main process pid. */
+    pthread_t main_thread_id;         /* 主线程id Main thread id */
+    char *configfile;           /* 配置文件绝对地址 Absolute config file path, or NULL */
     char *executable;           /* Absolute executable file path. */
     char **exec_argv;           /* Executable argv vector (copy). */
     int dynamic_hz;             /* Change hz value depending on # of clients. */
@@ -1173,20 +1174,20 @@ struct redisServer {
     mode_t umask;               /* The umask value of the process on startup */
     int hz;                     /* serverCron() calls frequency in hertz */
     int in_fork_child;          /* indication that this is a fork child */
-    redisDb *db;
-    dict *commands;             /* Command table */
+    redisDb *db;                /* 指向db数组指针 */
+    dict *commands;             /* 支持的命令字典,key为命令名称,value为redisCommand结构体 Command table */
     dict *orig_commands;        /* Command table before command renaming. */
-    aeEventLoop *el;
+    aeEventLoop *el;            /* el:事件循环 aeEventLoop:事件类型 */
     rax *errors;                /* Errors table */
     redisAtomic unsigned int lruclock; /* Clock for LRU eviction */
     volatile sig_atomic_t shutdown_asap; /* SHUTDOWN needed ASAP */
     int activerehashing;        /* Incremental rehash in serverCron() */
     int active_defrag_running;  /* Active defragmentation running (holds current scan aggressiveness) */
-    char *pidfile;              /* PID file path */
+    char *pidfile;              /* pid文件 PID file path */
     int arch_bits;              /* 32 or 64 depending on sizeof(long) */
     int cronloops;              /* Number of times the cron function run */
     char runid[CONFIG_RUN_ID_SIZE+1];  /* ID always different at every exec. */
-    int sentinel_mode;          /* True if this instance is a Sentinel. */
+    int sentinel_mode;          /* 是否为哨兵模式 True if this instance is a Sentinel. */
     size_t initial_memory_usage; /* Bytes used after initialization. */
     int always_show_logo;       /* Show logo even for non-stdout logging. */
     int in_eval;                /* Are we inside EVAL? */
@@ -1324,7 +1325,7 @@ struct redisServer {
     int active_defrag_cycle_max;       /* maximal effort for defrag in CPU percentage */
     unsigned long active_defrag_max_scan_fields; /* maximum number of fields of set/hash/zset/list to process from within the main dict scan */
     size_t client_max_querybuf_len; /* Limit for client query buffer length */
-    int dbnum;                      /* Total number of configured DBs */
+    int dbnum;                      /* 配置的数据库总数 Total number of configured DBs */
     int supervised;                 /* 1 if supervised, 0 otherwise. */
     int supervised_mode;            /* See SUPERVISED_* */
     int daemonize;                  /* True if running as a daemon */
@@ -1631,10 +1632,12 @@ typedef struct {
 
 typedef void redisCommandProc(client *c);
 typedef int redisGetKeysProc(struct redisCommand *cmd, robj **argv, int argc, getKeysResult *result);
+
+/* 命令结构体 */
 struct redisCommand {
-    char *name;
-    redisCommandProc *proc;
-    int arity;
+    char *name;              /* 命令名称 */
+    redisCommandProc *proc;  /* 命令处理函数 */
+    int arity;               /* 参数数目 */
     char *sflags;   /* Flags as string representation, one char per flag. */
     uint64_t flags; /* The actual flags, obtained from the 'sflags' field. */
     /* Use a function to determine keys arguments in a command line.

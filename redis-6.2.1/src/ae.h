@@ -97,16 +97,18 @@ typedef struct aeFiredEvent {
 
 /* State of an event based program */
 typedef struct aeEventLoop {
-    int maxfd;   /* highest file descriptor currently registered */
+    int maxfd;   /* 允许打开的最大文件描述符 highest file descriptor currently registered */
     int setsize; /* max number of file descriptors tracked */
     long long timeEventNextId;
-    aeFileEvent *events; /* Registered events */
-    aeFiredEvent *fired; /* Fired events */
-    aeTimeEvent *timeEventHead;
-    int stop;
-    void *apidata; /* This is used for polling API specific data */
+    aeFileEvent *events; /* 储存已经注册的文件事件  Registered events */
+    aeFiredEvent *fired; /* 储存已经触发的文件事件  Fired events */
+    aeTimeEvent *timeEventHead; /* 储存时间事件链表 */
+    int stop;  /* 标志事件循环是否结束 */
+    void *apidata; /* 多路复用模型封装 This is used for polling API specific data */
     aeBeforeSleepProc *beforesleep;
-    aeBeforeSleepProc *aftersleep;
+    aeBeforeSleepProc *aftersleep;  /* Redis服务器需要阻塞以等待文件事件的发生，
+                                       进程阻塞之前会调用beforesleep函数，当进
+                                       程被唤醒之后会调用aftersleep函数 */
     int flags;
 } aeEventLoop;
 
