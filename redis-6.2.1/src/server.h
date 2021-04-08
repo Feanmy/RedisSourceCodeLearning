@@ -669,11 +669,12 @@ typedef struct RedisModuleDigest {
 typedef struct redisObject {
     unsigned type:4;
     unsigned encoding:4;
-    /* lru字段记录数据最近一次被访问的时间戳，用作缓存淘汰 */
+    /* 24位 lru字段记录数据最近一次被访问的时间戳，用作缓存淘汰 */
+    /* 如果是LFU淘汰策略，前16位存储访问时间，后8位储存访问次数 */
     unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or
                             * LFU data (least significant 8 bits frequency
                             * and most significant 16 bits access time). */
-    int refcount;
+    int refcount;  /* 引用计数 */
     void *ptr;
 } robj;
 
