@@ -203,6 +203,7 @@ int aeGetFileEvents(aeEventLoop *eventLoop, int fd) {
     return fe->mask;
 }
 
+/* 创建时间事件函数 */
 long long aeCreateTimeEvent(aeEventLoop *eventLoop, long long milliseconds,
         aeTimeProc *proc, void *clientData,
         aeEventFinalizerProc *finalizerProc)
@@ -213,15 +214,16 @@ long long aeCreateTimeEvent(aeEventLoop *eventLoop, long long milliseconds,
     te = zmalloc(sizeof(*te));
     if (te == NULL) return AE_ERR;
     te->id = id;
-    te->when = getMonotonicUs() + milliseconds * 1000;
-    te->timeProc = proc;
-    te->finalizerProc = finalizerProc;
-    te->clientData = clientData;
+    te->when = getMonotonicUs() + milliseconds * 1000;  /* milliseconds: 事件触发时间,毫秒. 这是一个相对时间
+                                                           从当前时间算起,milliseconds后触发 */
+    te->timeProc = proc;  /* 指向时间处理函数 */
+    te->finalizerProc = finalizerProc; /* 删除时间事件节点之前的调用函数 */
+    te->clientData = clientData;       /* 对应的结构体对象*/
     te->prev = NULL;
     te->next = eventLoop->timeEventHead;
     te->refcount = 0;
     if (te->next)
-        te->next->prev = te;
+        te->next->prev = te; /* 这是建立前后的节点关系吗? */
     eventLoop->timeEventHead = te;
     return id;
 }
@@ -264,17 +266,19 @@ static long msUntilEarliestTimer(aeEventLoop *eventLoop) {
             ? 0 : (long)((earliest->when - now) / 1000);
 }
 
-/* Process time events */
+/* Process time events 处理时间事件函数 */
 static int processTimeEvents(aeEventLoop *eventLoop) {
     int processed = 0;
     aeTimeEvent *te;
     long long maxId;
 
-    te = eventLoop->timeEventHead;
+    te = eventLoop->timeEventHead;  /* 链表首节点 */
     maxId = eventLoop->timeEventNextId-1;
     monotime now = getMonotonicUs();
-    while(te) {
+    while(te) {  /* 循环遍历链表 */
         long long id;
+
+        /* 处理流程没看太懂... */
 
         /* Remove events scheduled for deletion. */
         if (te->id == AE_DELETED_EVENT_ID) {
