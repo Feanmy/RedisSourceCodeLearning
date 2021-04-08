@@ -76,22 +76,22 @@ typedef struct aeFileEvent {
     void *clientData;
 } aeFileEvent;
 
-/* Time event structure */
+/* Time event structure 时间事件结构体*/
 typedef struct aeTimeEvent {
-    long long id; /* time event identifier. */
-    monotime when;
-    aeTimeProc *timeProc;
-    aeEventFinalizerProc *finalizerProc;
-    void *clientData;
-    struct aeTimeEvent *prev;
-    struct aeTimeEvent *next;
+    long long id; /* 时间事件id time event identifier. */
+    monotime when; /* 这里应该是监控事件发生时间 */
+    aeTimeProc *timeProc; /* 函数指针, 指向处理时间事件的函数 */
+    aeEventFinalizerProc *finalizerProc; /* 函数指针, 删除时间事件节点之前会调用此函数 */
+    void *clientData;  /* 指向对应的客户端对象 */
+    struct aeTimeEvent *prev; /* 指向前一个节点 */
+    struct aeTimeEvent *next; /* 指向下一个节点 */
     int refcount; /* refcount to prevent timer events from being
-  		   * freed in recursive time event calls. */
+  		   * freed in recursive time event calls. 事件被执行的次数 */
 } aeTimeEvent;
 
 /* A fired event */
 typedef struct aeFiredEvent {
-    int fd;
+    int fd;  /* socket文件描述符 */
     int mask;
 } aeFiredEvent;
 
@@ -102,7 +102,7 @@ typedef struct aeEventLoop {
     long long timeEventNextId;
     aeFileEvent *events; /* 储存已经注册的文件事件数组，索引是socket文件描述符  Registered events */
     aeFiredEvent *fired; /* 储存已经触发的文件事件  Fired events */
-    aeTimeEvent *timeEventHead; /* 储存时间事件链表 */
+    aeTimeEvent *timeEventHead; /* 储存时间事件,多个事件组成链表,timeEventHead指向链表首节点 */
     int stop;  /* 标志事件循环是否结束 */
     void *apidata; /* 多路复用模型封装 This is used for polling API specific data */
     aeBeforeSleepProc *beforesleep;
