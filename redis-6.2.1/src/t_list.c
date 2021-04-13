@@ -77,6 +77,7 @@ robj *listTypePop(robj *subject, int where) {
     return value;
 }
 
+/* 返回列表长度, 即元素个数 */
 unsigned long listTypeLength(const robj *subject) {
     if (subject->encoding == OBJ_ENCODING_QUICKLIST) {
         return quicklistCount(subject->ptr);   /* 返回元素个数, 记录在quicklist结构体中的count字段
@@ -108,7 +109,7 @@ listTypeIterator *listTypeInitIterator(robj *subject, long index,
     return li;
 }
 
-/* Clean up the iterator. */
+/* Clean up the iterator. 清除迭代器 */
 void listTypeReleaseIterator(listTypeIterator *li) {
     zfree(li->iter);
     zfree(li);
