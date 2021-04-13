@@ -105,7 +105,7 @@ typedef struct quicklistBookmark {
 typedef struct quicklist {
     quicklistNode *head;
     quicklistNode *tail;
-    unsigned long count;        /* total count of all entries in all ziplists */
+    unsigned long count;        /* 返回元素个数 total count of all entries in all ziplists */
     unsigned long len;          /* number of quicklistNodes */
     int fill : QL_FILL_BITS;              /* fill factor for individual nodes */
     unsigned int compress : QL_COMP_BITS; /* depth of end nodes not to compress;0=off */
