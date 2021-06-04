@@ -1196,12 +1196,21 @@ struct redisServer {
 	// 指向数据库的指针
     redisDb *db;                /* 指向db数组指针 */
 
+	// 命令字典
 	dict *commands;             /* 支持的命令字典,key为命令名称,value为redisCommand结构体 Command table */
-    dict *orig_commands;        /* Command table before command renaming. */
-    aeEventLoop *el;            /* el:事件循环 aeEventLoop:事件类型 */
-    rax *errors;                /* Errors table */
-    redisAtomic unsigned int lruclock; /* Clock for LRU eviction */
-    volatile sig_atomic_t shutdown_asap; /* SHUTDOWN needed ASAP */
+
+	dict *orig_commands;        /* Command table before command renaming. */
+
+	// 循环事件
+	aeEventLoop *el;            /* el:事件循环 aeEventLoop:事件类型 */
+
+	// 错误信息
+	rax *errors;                /* Errors table */
+
+	// LRU逐出时间设置
+	redisAtomic unsigned int lruclock; /* Clock for LRU eviction */
+
+	volatile sig_atomic_t shutdown_asap; /* SHUTDOWN needed ASAP */
     int activerehashing;        /* Incremental rehash in serverCron() */
     int active_defrag_running;  /* Active defragmentation running (holds current scan aggressiveness) */
     char *pidfile;              /* pid文件 PID file path */
