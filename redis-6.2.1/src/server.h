@@ -1328,7 +1328,7 @@ struct redisServer {
     int io_threads_active;      /* Is IO threads currently active? */
     long long events_processed_while_blocked; /* processEventsWhileBlocked() */
 
-    /* RDB / AOF loading information */
+    /* RDB / AOF loading information RDB&AOF持久化相关 */
     volatile sig_atomic_t loading; /* We are loading data from disk if true */
     off_t loading_total_bytes;
     off_t loading_rdb_used_mem;
@@ -1345,8 +1345,14 @@ struct redisServer {
     time_t stat_starttime;          /* Server start time */
     long long stat_numcommands;     /* Number of processed commands */
     long long stat_numconnections;  /* Number of connections received */
+
+	// 已过期key的数量
     long long stat_expiredkeys;     /* Number of expired keys */
+
+	// 可能过期key的百分比
     double stat_expired_stale_perc; /* Percentage of keys probably expired */
+
+	
     long long stat_expired_time_cap_reached_count; /* Early expire cylce stops.*/
     long long stat_expire_cycle_time_used; /* Cumulative microseconds used. */
     long long stat_evictedkeys;     /* Number of evicted keys (maxmemory) */
