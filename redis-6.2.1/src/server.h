@@ -1177,15 +1177,26 @@ struct redisServer {
 
 	// 运行时参数
 	char **exec_argv;           /* Executable argv vector (copy). */
+
+	// hz是什么东西???
     int dynamic_hz;             /* Change hz value depending on # of clients. */
+
+	// 如果dynamic_hz是开始的，那么config_hz可能会与实际的值不同
     int config_hz;              /* Configured HZ value. May be different than
                                    the actual 'hz' field value if dynamic-hz
                                    is enabled. */
+    // 启动时进程的umask                             
     mode_t umask;               /* The umask value of the process on startup */
-    int hz;                     /* serverCron() calls frequency in hertz */
-    int in_fork_child;          /* indication that this is a fork child */
+
+	int hz;                     /* serverCron() calls frequency in hertz */
+
+	// 标识是一个fork子进程
+	int in_fork_child;          /* indication that this is a fork child */
+
+	// 指向数据库的指针
     redisDb *db;                /* 指向db数组指针 */
-    dict *commands;             /* 支持的命令字典,key为命令名称,value为redisCommand结构体 Command table */
+
+	dict *commands;             /* 支持的命令字典,key为命令名称,value为redisCommand结构体 Command table */
     dict *orig_commands;        /* Command table before command renaming. */
     aeEventLoop *el;            /* el:事件循环 aeEventLoop:事件类型 */
     rax *errors;                /* Errors table */
