@@ -1213,13 +1213,25 @@ struct redisServer {
 	volatile sig_atomic_t shutdown_asap; /* SHUTDOWN needed ASAP */
     int activerehashing;        /* Incremental rehash in serverCron() */
     int active_defrag_running;  /* Active defragmentation running (holds current scan aggressiveness) */
-    char *pidfile;              /* pid文件 PID file path */
-    int arch_bits;              /* 32 or 64 depending on sizeof(long) */
-    int cronloops;              /* Number of times the cron function run */
-    char runid[CONFIG_RUN_ID_SIZE+1];  /* ID always different at every exec. */
-    int sentinel_mode;          /* 是否为哨兵模式 True if this instance is a Sentinel. */
-    size_t initial_memory_usage; /* Bytes used after initialization. */
-    int always_show_logo;       /* Show logo even for non-stdout logging. */
+
+	// PID文件路径
+	char *pidfile;              /* pid文件 PID file path */
+
+	int arch_bits;              /* 32 or 64 depending on sizeof(long) */
+
+	// 定时任务执行次数
+	int cronloops;              /* Number of times the cron function run */
+
+	// 运行ID，每次运行时都不同
+	char runid[CONFIG_RUN_ID_SIZE+1];  /* ID always different at every exec. */
+
+	// 标识是否为哨兵模式
+	int sentinel_mode;          /* 是否为哨兵模式 True if this instance is a Sentinel. */
+
+	// 初始化消耗的内存(字节)
+	size_t initial_memory_usage; /* Bytes used after initialization. */
+
+	int always_show_logo;       /* Show logo even for non-stdout logging. */
     int in_eval;                /* Are we inside EVAL? */
     int in_exec;                /* Are we inside EXEC? */
     int propagate_in_transaction;  /* Make sure we don't propagate nested MULTI/EXEC */
@@ -1233,27 +1245,64 @@ struct redisServer {
     int module_blocked_pipe[2]; /* Pipe used to awake the event loop if a
                                    client blocked on a module command needs
                                    to be processed. */
+
+	// 当前子线程PID
     pid_t child_pid;            /* PID of current child */
-    int child_type;             /* Type of current child */
+
+	int child_type;             /* Type of current child */
     client *module_client;      /* "Fake" client to call Redis from modules */
-    /* Networking */
-    int port;                   /* TCP listening port */
-    int tls_port;               /* TLS listening port */
+
+
+	/* Networking */
+
+	// TCP监听端口号
+	int port;                   /* TCP listening port */
+
+	// tcp ssl
+	int tls_port;               /* TLS listening port */
+
+	// tcp监听队列长度
     int tcp_backlog;            /* TCP listen() backlog */
+
+	// 绑定地址
     char *bindaddr[CONFIG_BINDADDR_MAX]; /* Addresses we should bind to */
+
+	// 绑定地址的个数
     int bindaddr_count;         /* Number of addresses in server.bindaddr[] */
+
+	// unix套接字路径
     char *unixsocket;           /* UNIX socket path */
+
+	// unix套接字权限
     mode_t unixsocketperm;      /* UNIX socket permission */
+
+	// tcp套接字描述符
     socketFds ipfd;             /* TCP socket file descriptors */
+
+	// tls套接字描述符
     socketFds tlsfd;            /* TLS socket file descriptors */
+
+	// unix套接字描述符
     int sofd;                   /* Unix socket file descriptor */
+
+	// 集群套接字
     socketFds cfd;              /* Cluster bus listening socket */
+
+	// 活跃客户端列表
     list *clients;              /* List of active clients */
+
+	// 异步关闭的客户端
     list *clients_to_close;     /* Clients to close asynchronously */
     list *clients_pending_write; /* There is to write or install handler. */
     list *clients_pending_read;  /* Client has pending read socket buffers. */
+
+	// slave列表 monitor列表
     list *slaves, *monitors;    /* List of slaves and MONITORs */
+
+	// 正在执行当前命令的客户端
     client *current_client;     /* Current client executing the command. */
+
+	
     rax *clients_timeout_table; /* Radix tree for blocked clients timeouts. */
     long fixed_time_expire;     /* If > 0, expire keys against server.mstime. */
     rax *clients_index;         /* Active clients dictionary by client ID. */
