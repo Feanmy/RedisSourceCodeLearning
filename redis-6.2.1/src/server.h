@@ -1355,6 +1355,8 @@ struct redisServer {
 	
     long long stat_expired_time_cap_reached_count; /* Early expire cylce stops.*/
     long long stat_expire_cycle_time_used; /* Cumulative microseconds used. */
+
+	// 内存过载 被逐出的key的数量
     long long stat_evictedkeys;     /* Number of evicted keys (maxmemory) */
     long long stat_keyspace_hits;   /* Number of successful lookups of keys */
     long long stat_keyspace_misses; /* Number of failed lookups of keys */
@@ -1401,8 +1403,14 @@ struct redisServer {
         long long samples[STATS_METRIC_SAMPLES];
         int idx;
     } inst_metric[STATS_METRIC_COUNT];
-    /* Configuration */
+
+
+	/* Configuration  配置信息 */
+
+	// 日志级别
     int verbosity;                  /* Loglevel in redis.conf */
+
+	// 客户端最大连接超时时间
     int maxidletime;                /* Client timeout in seconds */
     int tcpkeepalive;               /* Set SO_KEEPALIVE if non-zero. */
     int active_expire_enabled;      /* Can be disabled for testing purposes. */
@@ -1418,36 +1426,47 @@ struct redisServer {
     int active_defrag_cycle_max;       /* maximal effort for defrag in CPU percentage */
     unsigned long active_defrag_max_scan_fields; /* maximum number of fields of set/hash/zset/list to process from within the main dict scan */
     size_t client_max_querybuf_len; /* Limit for client query buffer length */
+
+	// db数量
     int dbnum;                      /* 配置的数据库总数 Total number of configured DBs */
+
+	// 1.监管 2.其他
     int supervised;                 /* 1 if supervised, 0 otherwise. */
     int supervised_mode;            /* See SUPERVISED_* */
+
+	// 后台进程运行
     int daemonize;                  /* True if running as a daemon */
+
+	// 改变进程名称
     int set_proc_title;             /* True if change proc title */
     char *proc_title_template;      /* Process title template format */
     clientBufferLimitsConfig client_obuf_limits[CLIENT_TYPE_OBUF_COUNT];
-    /* AOF persistence */
-    int aof_enabled;                /* AOF configuration */
-    int aof_state;                  /* AOF_(ON|OFF|WAIT_REWRITE) */
-    int aof_fsync;                  /* Kind of fsync() policy */
-    char *aof_filename;             /* Name of the AOF file */
-    int aof_no_fsync_on_rewrite;    /* Don't fsync if a rewrite is in prog. */
-    int aof_rewrite_perc;           /* Rewrite AOF if % growth is > M and... */
+
+
+
+	/* AOF persistence  AOF持久化 */
+    int aof_enabled;                /* AOF configuration  是否开启AOF */
+    int aof_state;                  /* AOF_(ON|OFF|WAIT_REWRITE) AOF的状态 */
+    int aof_fsync;                  /* Kind of fsync() policy AOF刷盘策略 */
+    char *aof_filename;             /* Name of the AOF file AOF文件名称 */
+    int aof_no_fsync_on_rewrite;    /* Don't fsync if a rewrite is in prog. AOF重写时不进行刷盘 */
+    int aof_rewrite_perc;           /* Rewrite AOF if % growth is > M and... 当AOF文件增长百分比大于值时，触发重写 */
     off_t aof_rewrite_min_size;     /* the AOF file is at least N bytes. */
     off_t aof_rewrite_base_size;    /* AOF size on latest startup or rewrite. */
     off_t aof_current_size;         /* AOF current size. */
     off_t aof_fsync_offset;         /* AOF offset which is already synced to disk. */
-    int aof_flush_sleep;            /* Micros to sleep before flush. (used by tests) */
-    int aof_rewrite_scheduled;      /* Rewrite once BGSAVE terminates. */
-    list *aof_rewrite_buf_blocks;   /* Hold changes during an AOF rewrite. */
-    sds aof_buf;      /* AOF buffer, written before entering the event loop */
-    int aof_fd;       /* File descriptor of currently selected AOF file */
-    int aof_selected_db; /* Currently selected DB in AOF */
+    int aof_flush_sleep;            /* Micros to sleep before flush. (used by tests) 在flush之前的休眠时间,微秒 */
+    int aof_rewrite_scheduled;      /* Rewrite once BGSAVE terminates. BGSAVE结束后进行重写 */
+    list *aof_rewrite_buf_blocks;   /* Hold changes during an AOF rewrite. 在AOF重写期间，保存发生的更改 */
+    sds aof_buf;      /* AOF buffer, written before entering the event loop  在进入事件循环前，写操作在aof_buffer */
+    int aof_fd;       /* File descriptor of currently selected AOF file  当前aof文件描述符 */
+    int aof_selected_db; /* Currently selected DB in AOF 当前AOF使用的DB */
     time_t aof_flush_postponed_start; /* UNIX time of postponed AOF flush */
-    time_t aof_last_fsync;            /* UNIX time of last fsync() */
-    time_t aof_rewrite_time_last;   /* Time used by last AOF rewrite run. */
-    time_t aof_rewrite_time_start;  /* Current AOF rewrite start time. */
+    time_t aof_last_fsync;            /* UNIX time of last fsync() 最近一次同步的unix时间 */
+    time_t aof_rewrite_time_last;   /* Time used by last AOF rewrite run. 最近一次aof rewrite 消耗的时间 */
+    time_t aof_rewrite_time_start;  /* Current AOF rewrite start time. 当前aof rewrite起始时间 */
     int aof_lastbgrewrite_status;   /* C_OK or C_ERR */
-    unsigned long aof_delayed_fsync;  /* delayed AOF fsync() counter */
+    unsigned long aof_delayed_fsync;  /* delayed AOF fsync() counter  aof同步延迟计数器 */
     int aof_rewrite_incremental_fsync;/* fsync incrementally while aof rewriting? */
     int rdb_save_incremental_fsync;   /* fsync incrementally while rdb saving? */
     int aof_last_write_status;      /* C_OK or C_ERR */
@@ -2558,7 +2577,7 @@ char *redisGitDirty(void);
 uint64_t redisBuildId(void);
 char *redisBuildIdString(void);
 
-/* Commands prototypes */
+/* Commands prototypes  命令原型 */
 void authCommand(client *c);
 void pingCommand(client *c);
 void echoCommand(client *c);
