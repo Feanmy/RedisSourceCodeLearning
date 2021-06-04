@@ -1162,11 +1162,21 @@ typedef enum childInfoType {
 /* Redis服务端结构体 */
 struct redisServer {
     /* General */
+
+	// 进程ID
     pid_t pid;                  /* 进程id Main process pid. */
-    pthread_t main_thread_id;         /* 主线程id Main thread id */
+
+	// 主线程ID
+    pthread_t main_thread_id;   /* 主线程id Main thread id */
+
+	// 配置文件绝对地址
     char *configfile;           /* 配置文件绝对地址 Absolute config file path, or NULL */
+
+	// 可执行文件绝对地址
     char *executable;           /* Absolute executable file path. */
-    char **exec_argv;           /* Executable argv vector (copy). */
+
+	// 运行时参数
+	char **exec_argv;           /* Executable argv vector (copy). */
     int dynamic_hz;             /* Change hz value depending on # of clients. */
     int config_hz;              /* Configured HZ value. May be different than
                                    the actual 'hz' field value if dynamic-hz
