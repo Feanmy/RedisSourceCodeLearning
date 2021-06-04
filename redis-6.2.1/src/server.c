@@ -71,7 +71,7 @@ struct sharedObjectsStruct shared;
  * values are used for double on-disk serialization, and are initialized
  * at runtime to avoid strange compiler optimizations. */
 
-double R_Zero, R_PosInf, R_NegInf, R_Nan;
+double R_Zero, R_PosInf, R_NegInf, R_Nan;  // 运行时初始化
 
 /*================================= Globals ================================= */
 
