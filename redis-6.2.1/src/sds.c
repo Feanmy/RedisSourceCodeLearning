@@ -39,33 +39,34 @@
 #include "sds.h"
 #include "sdsalloc.h"
 
-const char *SDS_NOINIT = "SDS_NOINIT";
+const char *SDS_NOINIT = "SDS_NOINIT"; // 定义一个char指针常量
 
+// 这个方法没有完全搞明白
 static inline int sdsHdrSize(char type) {  /* 返回sds结构体大小 */
-    switch(type&SDS_TYPE_MASK) {
-        case SDS_TYPE_5:
+    switch(type&SDS_TYPE_MASK) { // SDS_TYPE_MASK = 7
+        case SDS_TYPE_5:  // case 0
             return sizeof(struct sdshdr5);
-        case SDS_TYPE_8:
+        case SDS_TYPE_8:  // case 1
             return sizeof(struct sdshdr8);
-        case SDS_TYPE_16:
+        case SDS_TYPE_16: // case 2
             return sizeof(struct sdshdr16);
-        case SDS_TYPE_32:
+        case SDS_TYPE_32: // case 3
             return sizeof(struct sdshdr32);
-        case SDS_TYPE_64:
+        case SDS_TYPE_64: // case 4
             return sizeof(struct sdshdr64);
     }
     return 0;
 }
 
-static inline char sdsReqType(size_t string_size) {  /* 返回类型 */
-    if (string_size < 1<<5)
+static inline char sdsReqType(size_t string_size) {  /* 根据给定长度值返回类型 */
+    if (string_size < 1<<5)  // 1<<5左移5位: 1*2^5=36
         return SDS_TYPE_5;
-    if (string_size < 1<<8)
+    if (string_size < 1<<8)  // 1<<8左移8位: 1*2^8=288
         return SDS_TYPE_8;
-    if (string_size < 1<<16)
+    if (string_size < 1<<16) // 1<<16左移16位: 1*2^16=82944
         return SDS_TYPE_16;
 #if (LONG_MAX == LLONG_MAX)
-    if (string_size < 1ll<<32)
+    if (string_size < 1ll<<32) // 1ll是什么鬼 Long Long
         return SDS_TYPE_32;
     return SDS_TYPE_64;
 #else
@@ -73,19 +74,23 @@ static inline char sdsReqType(size_t string_size) {  /* 返回类型 */
 #endif
 }
 
+/* 类型最大值 */
 static inline size_t sdsTypeMaxSize(char type) {
     if (type == SDS_TYPE_5)
-        return (1<<5) - 1;
+        return (1<<5) - 1;   // 1*2^5-1
     if (type == SDS_TYPE_8)
-        return (1<<8) - 1;
+        return (1<<8) - 1;   // 1*2^8-1
     if (type == SDS_TYPE_16)
-        return (1<<16) - 1;
+        return (1<<16) - 1;  // 1*2^16-1
 #if (LONG_MAX == LLONG_MAX)
     if (type == SDS_TYPE_32)
         return (1ll<<32) - 1;
 #endif
     return -1; /* this is equivalent to the max SDS_TYPE_64 or SDS_TYPE_32 */
 }
+
+
+
 
 /* Create a new sds string with the content specified by the 'init' pointer
  * and 'initlen'.
@@ -106,8 +111,8 @@ sds _sdsnewlen(const void *init, size_t initlen, int trymalloc) {  /* 创建一�
     char type = sdsReqType(initlen);
     /* Empty strings are usually created in order to append. Use type 8
      * since type 5 is not good at this. */
-    if (type == SDS_TYPE_5 && initlen == 0) type = SDS_TYPE_8;  /* 如果是sds_type_5，就转为sds_type_8 */
-    int hdrlen = sdsHdrSize(type);
+    if (type == SDS_TYPE_5 && initlen == 0) type = SDS_TYPE_8;  /* 如果是sds_type_5并且是个空的字符串，就转为sds_type_8 */
+    int hdrlen = sdsHdrSize(type); // 根据类型返回一个结构体的空间大小？
     unsigned char *fp; /* flags pointer. 指向flags的指针*/
     size_t usable;
 
@@ -175,6 +180,10 @@ sds sdstrynewlen(const void *init, size_t initlen) {
 
 /* Create an empty (zero length) sds string. Even in this case the string
  * always has an implicit null term. */
+
+/*
+ * 创建空字符串(0长度)
+ */
 sds sdsempty(void) {
     return sdsnewlen("",0);
 }
@@ -191,7 +200,8 @@ sds sdsdup(const sds s) {
 }
 
 /* Free an sds string. No operation is performed if 's' is NULL. */
-void sdsfree(sds s) { /* 释放一个sds字符串，如果为空，则不执行任何操作 */
+/* 释放一个sds字符串，如果为空，则不执行任何操作 */
+void sdsfree(sds s) {
     if (s == NULL) return;
     s_free((char*)s-sdsHdrSize(s[-1]));
 }
