@@ -93,7 +93,7 @@ struct redisServer server; /* Server global state */
  * flags:       Flags as bitmask. Computed by Redis using the 'sflags' field.
  *
  * get_keys_proc: An optional function to get key arguments from a command.
- *                This is only used when the following three fields are not
+ *                This is only used when the following three fields are not；
  *                enough to specify what arguments are keys.
  *
  * first_key_index: First argument that is a key
@@ -1203,7 +1203,7 @@ err:
     if (!log_to_stdout) close(fd);
 }
 
-/* Return the UNIX time in microseconds */
+/* Return the UNIX time in microseconds 返回Unix时间(微秒) */
 long long ustime(void) {
     struct timeval tv;
     long long ust;
@@ -1214,16 +1214,21 @@ long long ustime(void) {
     return ust;
 }
 
-/* Return the UNIX time in milliseconds */
+/* Return the UNIX time in milliseconds 返回Unix时间(毫秒) */
 mstime_t mstime(void) {
-    return ustime()/1000;
+    return ustime()/1000;  // 毫秒 = 微秒/1000
 }
 
 /* After an RDB dump or AOF rewrite we exit from children using _exit() instead of
  * exit(), because the latter may interact with the same file objects used by
  * the parent process. However if we are testing the coverage normal exit() is
  * used in order to obtain the right coverage information. */
-void exitFromChild(int retcode) {
+
+/*
+ * 在进行RDB备份或者AOF重写之后，我们通过_exit()而不是exit()来退出子进程。
+ * 因为exit()有可能影响到父进程正在使用的同一个文件对象。
+ */
+void exitFromChild(int retcode) {  /* 退出子进程 */
 #ifdef COVERAGE_TEST
     exit(retcode);
 #else
@@ -1232,10 +1237,16 @@ void exitFromChild(int retcode) {
 }
 
 /*====================== Hash table type implementation  ==================== */
+/*====================== Hash table 类型实现                 ==================== */
 
 /* This is a hash table type that uses the SDS dynamic strings library as
  * keys and redis objects as values (objects can hold SDS strings,
  * lists, sets). */
+
+/*
+ * Hash Table 使用SDS动态字符串来作为key，使用Redis Object类型来作为value
+ * Redis Object 可以存储SDS、Lists、Sets
+ */
 
 void dictVanillaFree(void *privdata, void *val)
 {
@@ -1268,7 +1279,7 @@ int dictSdsKeyCaseCompare(void *privdata, const void *key1,
 {
     DICT_NOTUSED(privdata);
 
-    return strcasecmp(key1, key2) == 0;
+    return strcasecmp(key1, key2) == 0; /* 忽略大小写，判断两个key是否相等 */
 }
 
 void dictObjectDestructor(void *privdata, void *val)

@@ -191,7 +191,7 @@ sds sdsdup(const sds s) {
 }
 
 /* Free an sds string. No operation is performed if 's' is NULL. */
-void sdsfree(sds s) {
+void sdsfree(sds s) { /* 释放一个sds字符串，如果为空，则不执行任何操作 */
     if (s == NULL) return;
     s_free((char*)s-sdsHdrSize(s[-1]));
 }
