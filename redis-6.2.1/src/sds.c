@@ -255,14 +255,18 @@ sds sdsMakeRoomFor(sds s, size_t addlen) {  /* 空间扩容 */
     sh = (char*)s-sdsHdrSize(oldtype);
     newlen = (len+addlen);
     assert(newlen > len);   /* Catch size_t overflow */
-    
-    /* 如果新长度小于SDS_MAX_PREALLOC 空间扩大1倍，否则增大1024*1024 1M=1024*1024b */
+
+	
+    // ======================== 扩容策略 ======================== 
+    /* 如果新长度小于SDS_MAX_PREALLOC(1M) 空间扩大1倍，否则增大1024*1024 1M=1024*1024b */
     if (newlen < SDS_MAX_PREALLOC)
         newlen *= 2; /* 如果小于1M，就按新长度扩大1倍 */
     else
         newlen += SDS_MAX_PREALLOC; /* 如果新长度>=1M，就在新长度的基础上再多分配1M的空间 */
+	// ======================== 扩容策略 ======================== 
 
-    type = sdsReqType(newlen); /* 根据新长度获取类型 */
+
+	type = sdsReqType(newlen); /* 根据新长度获取类型 */
 
     /* Don't use type 5: the user is appending to the string and type 5 is
      * not able to remember empty space, so sdsMakeRoomFor() must be called
