@@ -39,34 +39,46 @@
  * listSetFreeMethod.
  *
  * On error, NULL is returned. Otherwise the pointer to the new list. */
-list *listCreate(void)
+/* 创建一个新的链表. 创建的链表可能通过listRelease()释放, 
+ * 但是每个节点的值需要, 用户在调用listRelease()之前释放掉, 
+ * 或者通过listSetFreeMethod设置一个释放方法.
+ * 
+ * 创建失败会返回NULL, 成功则返回指向新链表的指针 */
+list *listCreate(void)      /* 返回类型list  *   */
 {
-    struct list *list;
+    struct list *list; /* 声明一个list结构体 */
 
-    if ((list = zmalloc(sizeof(*list))) == NULL)
+    if ((list = zmalloc(sizeof(*list))) == NULL) /* 内存分配失败 */
         return NULL;
-    list->head = list->tail = NULL;
+
+	/* 成员初始化 */
+	list->head = list->tail = NULL;
     list->len = 0;
     list->dup = NULL;
     list->free = NULL;
     list->match = NULL;
-    return list;
+    return list; /* 返回新链表的指针 */
 }
 
 /* Remove all the elements from the list without destroying the list itself. */
+/* 在不影响链表本身的情况下，移除掉其中所有的元素 */
 void listEmpty(list *list)
 {
     unsigned long len;
     listNode *current, *next;
 
-    current = list->head;
-    len = list->len;
-    while(len--) {
+    current = list->head; /* 链表起始地址 */
+    len = list->len; /* 链表长度 */
+
+	/* 循环释放元素 */
+	while(len--) {
         next = current->next;
         if (list->free) list->free(current->value);
         zfree(current);
         current = next;
     }
+
+	/* 成员操作 */
     list->head = list->tail = NULL;
     list->len = 0;
 }
@@ -74,10 +86,11 @@ void listEmpty(list *list)
 /* Free the whole list.
  *
  * This function can't fail. */
+/* 释放整个链表 */
 void listRelease(list *list)
 {
-    listEmpty(list);
-    zfree(list);
+    listEmpty(list); /* 调用listEmpty()释放所有的元素 */
+    zfree(list); /* 释放内存 */
 }
 
 /* Add a new node to the list, to head, containing the specified 'value'
@@ -86,24 +99,26 @@ void listRelease(list *list)
  * On error, NULL is returned and no operation is performed (i.e. the
  * list remains unaltered).
  * On success the 'list' pointer you pass to the function is returned. */
+/* 向链表头部添加一个新节点
+ * 错误则返回NULL 成功则返回传入的list指针 */
 list *listAddNodeHead(list *list, void *value)
 {
     listNode *node;
 
-    if ((node = zmalloc(sizeof(*node))) == NULL)
+    if ((node = zmalloc(sizeof(*node))) == NULL) /* 内存分配失败 */
         return NULL;
     node->value = value;
-    if (list->len == 0) {
-        list->head = list->tail = node;
-        node->prev = node->next = NULL;
-    } else {
+    if (list->len == 0) {                 /* 是一个空链表 */
+        list->head = list->tail = node;   /* 添加的节点既是头节点也是尾节点 */
+        node->prev = node->next = NULL;   /* 前继和后继节点指针为NULL */
+    } else {                              /* 链表中已有节点的情况 */
         node->prev = NULL;
-        node->next = list->head;
-        list->head->prev = node;
-        list->head = node;
+        node->next = list->head;          /* 将现有节点作为新添加节点的下一个节点 */
+        list->head->prev = node;          /* 新节点与原头节点建立双向指向关系 */
+        list->head = node;                /* 将添加的节点设置为新的头节点 */
     }
-    list->len++;
-    return list;
+    list->len++;                          /* 链表长度加1 */
+    return list;                          /* 返回链表 */
 }
 
 /* Add a new node to the list, to tail, containing the specified 'value'
@@ -112,43 +127,49 @@ list *listAddNodeHead(list *list, void *value)
  * On error, NULL is returned and no operation is performed (i.e. the
  * list remains unaltered).
  * On success the 'list' pointer you pass to the function is returned. */
+/* 向链表尾部添加一个新节点.
+ * 如果失败, 返回NULL, 原链表不受影响
+ * 成功则返回传入的链表指针 */
 list *listAddNodeTail(list *list, void *value)
 {
     listNode *node;
 
-    if ((node = zmalloc(sizeof(*node))) == NULL)
+    if ((node = zmalloc(sizeof(*node))) == NULL) /* 内存分配失败 */
         return NULL;
     node->value = value;
-    if (list->len == 0) {
-        list->head = list->tail = node;
-        node->prev = node->next = NULL;
-    } else {
-        node->prev = list->tail;
-        node->next = NULL;
-        list->tail->next = node;
-        list->tail = node;
+    if (list->len == 0) {                      /* 是空链表     */
+        list->head = list->tail = node;        /* 新节点既是头节点也是尾节点 */
+        node->prev = node->next = NULL;        /* 新节点的前继和后继都为NULL */
+    } else {                                   /* 非空链表 */
+        node->prev = list->tail;               /* 将原尾节点作为新添加节点的前继 */
+        node->next = NULL;                     /* 将新节点的后继设为NULL */
+        list->tail->next = node;               /* 原尾节点的后继指向新添加节点 */
+        list->tail = node;                     /* 将链表尾节点指向新添加节点 */
     }
-    list->len++;
+    list->len++;                               /* 链表长度加1 */
     return list;
 }
 
+/* 向链表中插入节点
+ * 在指定的原节点向前或向后插入新节点
+ * 失败, 返回NULL 成功, 返回list */
 list *listInsertNode(list *list, listNode *old_node, void *value, int after) {
     listNode *node;
 
-    if ((node = zmalloc(sizeof(*node))) == NULL)
+    if ((node = zmalloc(sizeof(*node))) == NULL)      /* 内存分配失败 */
         return NULL;
     node->value = value;
-    if (after) {
-        node->prev = old_node;
-        node->next = old_node->next;
-        if (list->tail == old_node) {
-            list->tail = node;
+    if (after) {                                      /* 在给定节点后插入 */
+        node->prev = old_node;                        /* 新节点的前继为原节点 */
+        node->next = old_node->next;                  /* 新节点的后继为原节点的后继 */
+        if (list->tail == old_node) {                 /* 如果给定的节点为链表尾结点 */
+            list->tail = node;                        /* 新添加节点此时为新的尾节点 */
         }
-    } else {
-        node->next = old_node;
-        node->prev = old_node->prev;
-        if (list->head == old_node) {
-            list->head = node;
+    } else {                                          /* 如果是在给定节点前插入 */
+        node->next = old_node;                        /* 新添加节点的后继为给定节点 */
+        node->prev = old_node->prev;                  /* 新节点的前继为给定节点的前继 */
+        if (list->head == old_node) {                 /* 如果给定节点为头节点 */
+            list->head = node;                        /* 则新节点为此时的头节点 */
         }
     }
     if (node->prev != NULL) {

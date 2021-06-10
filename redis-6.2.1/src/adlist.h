@@ -1,4 +1,6 @@
 /* adlist.h - A generic doubly linked list implementation
+ * 通用的双链表实现方法
+ * 数据结构: 链表
  *
  * Copyright (c) 2006-2012, Salvatore Sanfilippo <antirez at gmail dot com>
  * All rights reserved.
@@ -33,17 +35,20 @@
 
 /* Node, List, and Iterator are the only data structures used currently. */
 
+/* 定义一个链表节点 */
 typedef struct listNode {
     struct listNode *prev;
     struct listNode *next;
     void *value;
 } listNode;
 
+/* 链表迭代器 */
 typedef struct listIter {
     listNode *next;
     int direction;
 } listIter;
 
+/* 定义链表结构体 */
 typedef struct list {
     listNode *head;
     listNode *tail;
