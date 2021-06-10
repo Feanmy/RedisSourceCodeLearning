@@ -282,12 +282,14 @@ list *listDup(list *orig)
     listIter iter;
     listNode *node;
 
-    if ((copy = listCreate()) == NULL)
+    if ((copy = listCreate()) == NULL)  /* 创建一个新的空链表  */
         return NULL;
-    copy->dup = orig->dup;
+
+	copy->dup = orig->dup;               /* 成员方法 */
     copy->free = orig->free;
     copy->match = orig->match;
-    listRewind(orig, &iter);
+
+	listRewind(orig, &iter);             /* 重置迭代器 */
     while((node = listNext(&iter)) != NULL) {
         void *value;
 
@@ -299,7 +301,7 @@ list *listDup(list *orig)
             }
         } else
             value = node->value;
-        if (listAddNodeTail(copy, value) == NULL) {
+        if (listAddNodeTail(copy, value) == NULL) {  /* 将节点插入到新链表尾部 */
             listRelease(copy);
             return NULL;
         }
@@ -378,7 +380,7 @@ void listRotateTailToHead(list *list) {
 }
 
 /* Rotate the list removing the head node and inserting it to the tail. */
-/* 旋转链表, 将头节点插入到尾节点中 */
+/* 旋转链表, 将头节点插入到尾节点中 操作同上 */
 void listRotateHeadToTail(list *list) {
     if (listLength(list) <= 1) return;
 
@@ -395,20 +397,21 @@ void listRotateHeadToTail(list *list) {
 
 /* Add all the elements of the list 'o' at the end of the
  * list 'l'. The list 'other' remains empty but otherwise valid. */
+/* 合并两个链表, 将后一个链表中的所有节点追加到前一个链表中 */
 void listJoin(list *l, list *o) {
     if (o->len == 0) return;
 
-    o->head->prev = l->tail;
+    o->head->prev = l->tail;        /* 链表o头节点的前继设为链表l的尾节点 */
 
     if (l->tail)
-        l->tail->next = o->head;
+        l->tail->next = o->head;    /* 链表l尾节点的后继指针指向链表o的头节点 */
     else
         l->head = o->head;
 
-    l->tail = o->tail;
-    l->len += o->len;
+    l->tail = o->tail;              /* 链表o的尾节点同时也是链表l的尾节点 */
+    l->len += o->len;               /* 链表长度 = 链表l的长度 + 链表o的长度 */
 
     /* Setup other as an empty list. */
-    o->head = o->tail = NULL;
+    o->head = o->tail = NULL;       /* 链表o重置为一个空链表          */
     o->len = 0;
 }
