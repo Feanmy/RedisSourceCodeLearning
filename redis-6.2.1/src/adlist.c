@@ -207,6 +207,8 @@ void listDelNode(list *list, listNode *node)
  * call to listNext() will return the next element of the list.
  *
  * This function can't fail. */
+/* 返回链表迭代器
+ * direction 控制迭代的方向 */
 listIter *listGetIterator(list *list, int direction)
 {
     listIter *iter;
@@ -221,7 +223,7 @@ listIter *listGetIterator(list *list, int direction)
 }
 
 /* Release the iterator memory */
-void listReleaseIterator(listIter *iter) {
+void listReleaseIterator(listIter *iter) {  /* 释放迭代器内存 */
     zfree(iter);
 }
 
@@ -250,12 +252,13 @@ void listRewindTail(list *list, listIter *li) {
  * }
  *
  * */
+/* 返回迭代器指向的下一个节点 */
 listNode *listNext(listIter *iter)
 {
     listNode *current = iter->next;
 
     if (current != NULL) {
-        if (iter->direction == AL_START_HEAD)
+        if (iter->direction == AL_START_HEAD)  /* 判断迭代的方向 */
             iter->next = current->next;
         else
             iter->next = current->prev;
