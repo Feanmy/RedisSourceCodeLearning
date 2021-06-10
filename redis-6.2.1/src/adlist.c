@@ -274,6 +274,8 @@ listNode *listNext(listIter *iter)
  * the original node is used as value of the copied node.
  *
  * The original list both on success or error is never modified. */
+/* 复制整个链表
+ * 内存溢出时, 返回NULL */
 list *listDup(list *orig)
 {
     list *copy;
@@ -314,16 +316,17 @@ list *listDup(list *orig)
  * On success the first matching node pointer is returned
  * (search starts from head). If no matching node exists
  * NULL is returned. */
+/* 通过给定的key查找一个节点 */
 listNode *listSearchKey(list *list, void *key)
 {
     listIter iter;
     listNode *node;
 
-    listRewind(list, &iter);
-    while((node = listNext(&iter)) != NULL) {
-        if (list->match) {
+    listRewind(list, &iter);  /* 重置迭代器 */
+    while((node = listNext(&iter)) != NULL) {       /* 指向的下一个节点存在 */
+        if (list->match) {                          /* 如果匹配到 */
             if (list->match(node->value, key)) {
-                return node;
+                return node;                        /* 返回匹配到的节点 */
             }
         } else {
             if (key == node->value) {
@@ -331,7 +334,7 @@ listNode *listSearchKey(list *list, void *key)
             }
         }
     }
-    return NULL;
+    return NULL;                                    /* 没有匹配项, 返回NULL        */
 }
 
 /* Return the element at the specified zero-based index
@@ -339,13 +342,16 @@ listNode *listSearchKey(list *list, void *key)
  * and so on. Negative integers are used in order to count
  * from the tail, -1 is the last element, -2 the penultimate
  * and so on. If the index is out of range NULL is returned. */
+/* 根据索引, 返回节点
+ * 索引以0开始, 依此类推
+ * 负数表示从尾部开始 */
 listNode *listIndex(list *list, long index) {
     listNode *n;
 
     if (index < 0) {
         index = (-index)-1;
         n = list->tail;
-        while(index-- && n) n = n->prev;
+        while(index-- && n) n = n->prev;  // 没看懂啊!!!
     } else {
         n = list->head;
         while(index-- && n) n = n->next;
@@ -353,22 +359,26 @@ listNode *listIndex(list *list, long index) {
     return n;
 }
 
+
+
 /* Rotate the list removing the tail node and inserting it to the head. */
+/* 旋转链表, 将尾部节点插入到头节点 */
 void listRotateTailToHead(list *list) {
     if (listLength(list) <= 1) return;
 
     /* Detach current tail */
-    listNode *tail = list->tail;
-    list->tail = tail->prev;
-    list->tail->next = NULL;
-    /* Move it as head */
-    list->head->prev = tail;
-    tail->prev = NULL;
-    tail->next = list->head;
-    list->head = tail;
+    listNode *tail = list->tail; /* 拿到尾节点 */
+    list->tail = tail->prev;     /* 将尾节点的前一个节点作为现在的尾节点 */
+    list->tail->next = NULL;     /* 并将此时的尾节点后继指针置为NULL */
+    /* Move it as head */        /* 开始移动操作 */
+    list->head->prev = tail;     /* 将此时头节点的前继指针指向原尾节点 */
+    tail->prev = NULL;           /* 将原尾节点的前继指针置为NULL */
+    tail->next = list->head;     /* 将原尾节点的后继指针指向此时的头节点 */
+    list->head = tail;           /* 原尾节点此时已成为新的头节点 */
 }
 
 /* Rotate the list removing the head node and inserting it to the tail. */
+/* 旋转链表, 将头节点插入到尾节点中 */
 void listRotateHeadToTail(list *list) {
     if (listLength(list) <= 1) return;
 
