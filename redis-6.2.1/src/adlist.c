@@ -172,33 +172,35 @@ list *listInsertNode(list *list, listNode *old_node, void *value, int after) {
             list->head = node;                        /* 则新节点为此时的头节点 */
         }
     }
-    if (node->prev != NULL) {
+    if (node->prev != NULL) {                         /* 将前一个节点的后继设为新节点 */
         node->prev->next = node;
     }
-    if (node->next != NULL) {
+    if (node->next != NULL) {                         /* 将后一个节点的前继设为新节点 */
         node->next->prev = node;
     }
-    list->len++;
+    list->len++;                                      /* 链表长度加1 */
     return list;
 }
+
 
 /* Remove the specified node from the specified list.
  * It's up to the caller to free the private value of the node.
  *
  * This function can't fail. */
+/* 删除指定链表中的指定节点 */
 void listDelNode(list *list, listNode *node)
 {
     if (node->prev)
-        node->prev->next = node->next;
+        node->prev->next = node->next;       /* 如果有前继指针,  则将前继指针的指向再后移一个节点 */
     else
-        list->head = node->next;
+        list->head = node->next;             /* 如果没有前继指针,即为头节点, 则将被删除节点的下一个节点作为头节点 */
     if (node->next)
-        node->next->prev = node->prev;
+        node->next->prev = node->prev;       /* 如果有后继指针,  则将后一个节点的前继指向被删除节点的前继 */
     else
-        list->tail = node->prev;
+        list->tail = node->prev;             /* 如果没有后继, 则链表的尾节点即为被删除节点的前一个节点 */
     if (list->free) list->free(node->value);
     zfree(node);
-    list->len--;
+    list->len--;                             /* 链表长度减一 */
 }
 
 /* Returns a list iterator 'iter'. After the initialization every
