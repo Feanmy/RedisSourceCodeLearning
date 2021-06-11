@@ -1,4 +1,5 @@
 /* Hash Tables Implementation.
+ * Hash表的实现
  *
  * This file implements in-memory hash tables with insert/del/replace/find/
  * get-random-element operations. Hash tables will auto-resize if needed
@@ -47,7 +48,7 @@
 /* Unused arguments generate annoying warnings... */
 #define DICT_NOTUSED(V) ((void) V)
 
-typedef struct dictEntry {
+typedef struct dictEntry {  /* 字典条目 */
     void *key;
     union {
         void *val;
@@ -70,6 +71,7 @@ typedef struct dictType {
 
 /* This is our hash table structure. Every dictionary has two of this as we
  * implement incremental rehashing, for the old to the new table. */
+/* 每个字典都有2个hash结构，为了渐进式rehash */
 typedef struct dictht {
     dictEntry **table;
     unsigned long size;
