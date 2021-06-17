@@ -490,7 +490,7 @@ int checkAlreadyExpired(long long when) {
 }
 
 /*-----------------------------------------------------------------------------
- * Expires Commands
+ * Expires Commands  设置键的过期时间
  *----------------------------------------------------------------------------*/
 
 /* This is the generic command implementation for EXPIRE, PEXPIRE, EXPIREAT
@@ -507,6 +507,8 @@ void expireGenericCommand(client *c, long long basetime, int unit) {
     if (getLongLongFromObjectOrReply(c, param, &when, NULL) != C_OK)
         return;
     int negative_when = when < 0;
+
+	// Redis内部是按毫秒为单位处理的，需要将客户端传入的秒转为毫秒
     if (unit == UNIT_SECONDS) when *= 1000;
     when += basetime;
     if (((when < 0) && !negative_when) || ((when-basetime > 0) && negative_when)) {
@@ -547,11 +549,13 @@ void expireGenericCommand(client *c, long long basetime, int unit) {
 }
 
 /* EXPIRE key seconds */
+/* 设置键的过期时间，接收的时间单位为秒 */
 void expireCommand(client *c) {
     expireGenericCommand(c,mstime(),UNIT_SECONDS);
 }
 
 /* EXPIREAT key time */
+/* 设置键在具体的时间点过期 */
 void expireatCommand(client *c) {
     expireGenericCommand(c,0,UNIT_SECONDS);
 }

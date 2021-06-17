@@ -1793,7 +1793,7 @@ void zaddGenericCommand(client *c, int flags) {
         {
             zobj = createZsetObject();
         } else {
-            zobj = createZsetZiplistObject();
+            zobj = createZsetZiplistObject();  // 压缩列表初始化
         }
         dbAdd(c->db,key,zobj);
     }

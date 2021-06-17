@@ -1,4 +1,5 @@
 /*
+ * 压缩列表
  * Copyright (c) 2009-2012, Pieter Noordhuis <pcnoordhuis at gmail dot com>
  * Copyright (c) 2009-2012, Salvatore Sanfilippo <antirez at gmail dot com>
  * All rights reserved.
@@ -44,6 +45,7 @@ typedef struct {
     long long lval;      /* 当值是整型时, sval为NULL, lval保存的是整型值 */
 } ziplistEntry;
 
+/* ziplist操作方法 */
 unsigned char *ziplistNew(void);
 unsigned char *ziplistMerge(unsigned char **first, unsigned char **second);
 unsigned char *ziplistPush(unsigned char *zl, unsigned char *s, unsigned int slen, int where);

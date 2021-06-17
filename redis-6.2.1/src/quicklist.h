@@ -1,5 +1,6 @@
 /* quicklist.h - A generic doubly linked quicklist implementation
  *
+ * 快速列表(双向链表和压缩列表的结合体)
  * Copyright (c) 2014, Matt Stancliff <matt@genges.com>
  * All rights reserved.
  *

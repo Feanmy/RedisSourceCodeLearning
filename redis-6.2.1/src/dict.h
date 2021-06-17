@@ -150,7 +150,7 @@ typedef void (dictScanBucketFunction)(void *privdata, dictEntry **bucketref);
 #define dictGetUnsignedIntegerVal(he) ((he)->v.u64)
 #define dictGetDoubleVal(he) ((he)->v.d)
 #define dictSlots(d) ((d)->ht[0].size+(d)->ht[1].size)
-#define dictSize(d) ((d)->ht[0].used+(d)->ht[1].used)
+#define dictSize(d) ((d)->ht[0].used+(d)->ht[1].used)  /* 全局哈希表中已使用数 */
 #define dictIsRehashing(d) ((d)->rehashidx != -1)
 #define dictPauseRehashing(d) (d)->pauserehash++
 #define dictResumeRehashing(d) (d)->pauserehash--

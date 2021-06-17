@@ -1484,7 +1484,7 @@ struct redisServer {
                                       to child process. */
     sds aof_child_diff;             /* AOF diff accumulator child side. */
     /* RDB persistence */
-    long long dirty;                /* Changes to DB from the last save */
+    long long dirty;                /* Changes to DB from the last save *//* 最近一个持久化后的改变数 */
     long long dirty_before_bgsave;  /* Used to restore dirty on failed BGSAVE */
     struct saveparam *saveparams;   /* Save points array for RDB */
     int saveparamslen;              /* Number of saving points */

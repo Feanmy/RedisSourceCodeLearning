@@ -12,10 +12,11 @@
  * ======================
  *
  * The general layout of the ziplist is as follows:
- *
+ * ziplist的内存结构
  * <zlbytes> <zltail> <zllen> <entry> <entry> ... <entry> <zlend>
  *
  * NOTE: all fields are stored in little endian, if not specified otherwise.
+ * 所有的fields都存储在小端字节
  *
  * <uint32_t zlbytes> is an unsigned integer to hold the number of bytes that
  * the ziplist occupies, including the four bytes of the zlbytes field itself.
@@ -192,7 +193,7 @@
 #include "endianconv.h"
 #include "redisassert.h"
 
-#define ZIP_END 255         /* Special "end of ziplist" entry. */
+#define ZIP_END 255  /* 指定ziplist尾部实体 标记链表结束 */    /* Special "end of ziplist" entry. */
 #define ZIP_BIG_PREVLEN 254 /* ZIP_BIG_PREVLEN - 1 is the max number of bytes of
                                the previous entry, for the "prevlen" field prefixing
                                each entry, to be represented with just a single byte.

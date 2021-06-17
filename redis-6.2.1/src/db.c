@@ -670,24 +670,27 @@ void flushallCommand(client *c) {
 }
 
 /* This command implements DEL and LAZYDEL. */
+/* 方法实现了删除及惰性删除 */
 void delGenericCommand(client *c, int lazy) {
     int numdel = 0, j;
 
     for (j = 1; j < c->argc; j++) {
         expireIfNeeded(c->db,c->argv[j]);
+		/* 决定同步还是异步删除 */
         int deleted  = lazy ? dbAsyncDelete(c->db,c->argv[j]) :
                               dbSyncDelete(c->db,c->argv[j]);
         if (deleted) {
             signalModifiedKey(c,c->db,c->argv[j]);
             notifyKeyspaceEvent(NOTIFY_GENERIC,
                 "del",c->argv[j],c->db->id);
-            server.dirty++;
+            server.dirty++; /* server.dirty 最近一次持久化后db的改变数 */
             numdel++;
         }
     }
     addReplyLongLong(c,numdel);
 }
 
+/* 删除键，与键类型无关，通用删除 */
 void delCommand(client *c) {
     delGenericCommand(c,server.lazyfree_lazy_user_del);
 }
@@ -698,11 +701,12 @@ void unlinkCommand(client *c) {
 
 /* EXISTS key1 key2 ... key_N.
  * Return value is the number of keys existing. */
+/* 检查键是否存在    ，可以同时检查多个键，返回存在的键的个数 */
 void existsCommand(client *c) {
     long long count = 0;
     int j;
 
-    for (j = 1; j < c->argc; j++) {
+    for (j = 1; j < c->argc; j++) {  /* c->argc客户端命令参数个数，此处即为要检查的键的个数  */
         if (lookupKeyReadWithFlags(c->db,c->argv[j],LOOKUP_NOTOUCH)) count++;
     }
     addReplyLongLong(c,count);
