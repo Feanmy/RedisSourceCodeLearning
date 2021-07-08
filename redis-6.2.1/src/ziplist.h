@@ -44,7 +44,9 @@ typedef struct {
     unsigned int slen;   /* string元素的长度 */
     /* When integer is used, 'sval' is NULL, and lval holds the value. */
     long long lval;      /* 当值是整型时, sval为NULL, lval保存的是整型值 */
-} ziplistEntry;
+} ziplistEntry;          /* ziplist数据结构体  */
+
+/** 记：ziplist实体只能是string或int类型   **/
 
 /* ziplist操作方法 */
 unsigned char *ziplistNew(void);
