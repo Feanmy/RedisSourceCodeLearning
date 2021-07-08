@@ -39,6 +39,7 @@
 /* ziplist中的实体不是string型就是integer型 */
 typedef struct {
     /* When string is used, it is provided with the length (slen). */
+    /* 如果保存的是string，slen即为string数据的长度  */
     unsigned char *sval; /* 保存string型的值 */
     unsigned int slen;   /* string元素的长度 */
     /* When integer is used, 'sval' is NULL, and lval holds the value. */
