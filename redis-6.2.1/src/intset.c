@@ -274,7 +274,7 @@ uint8_t intsetGet(intset *is, uint32_t pos, int64_t *value) {
     return 0;
 }
 
-/* Return intset length */
+/* Return intset length  uint32_t: unsigned int */
 uint32_t intsetLen(const intset *is) {
     return intrev32ifbe(is->length);
 }

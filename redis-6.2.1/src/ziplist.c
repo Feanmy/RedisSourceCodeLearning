@@ -12,7 +12,7 @@
  * ======================
  *
  * The general layout of the ziplist is as follows:
- * ziplist的内存结构
+ * ziplist的内存布局
  * <zlbytes> <zltail> <zllen> <entry> <entry> ... <entry> <zlend>
  *
  * NOTE: all fields are stored in little endian, if not specified otherwise.

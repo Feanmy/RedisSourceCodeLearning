@@ -309,6 +309,11 @@ uint32_t sdigits10(int64_t v) {
  * characters needed to represent the number.
  * If the buffer is not big enough to store the string, 0 is returned.
  *
+ * 将long long类型转为string，返回所需的字符大小
+ * 如果设定大小不够存储转换后的string，返回0
+ *
+ * 看不懂啊???
+ *
  * Based on the following article (that apparently does not provide a
  * novel approach but only publicizes an already used technique):
  *

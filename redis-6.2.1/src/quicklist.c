@@ -476,6 +476,7 @@ REDIS_STATIC int _quicklistNodeAllowMerge(const quicklistNode *a,
     } while (0)
 
 /* Add new entry to head node of quicklist.
+ * 在quicklist头结点插入一个元素
  *
  * Returns 0 if used existing head.
  * Returns 1 if new head created. */
@@ -1412,12 +1413,12 @@ int quicklistPop(quicklist *quicklist, int where, unsigned char **data,
 }
 
 /* Wrapper to allow argument-based switching between HEAD/TAIL pop */
-void quicklistPush(quicklist *quicklist, void *value, const size_t sz,
-                   int where) {
+void quicklistPush(quicklist *quicklist, void *value, const size_t sz,   /* quicklist *quicklist 指向要插入的quicklist指针 */
+                   int where) {                                          /* void *value 插入的元素 */
     if (where == QUICKLIST_HEAD) {
-        quicklistPushHead(quicklist, value, sz);
+        quicklistPushHead(quicklist, value, sz);                         /* 在quicklist头部插入 */
     } else if (where == QUICKLIST_TAIL) {
-        quicklistPushTail(quicklist, value, sz);
+        quicklistPushTail(quicklist, value, sz);                         /* 在quicklist尾部插入 */
     }
 }
 

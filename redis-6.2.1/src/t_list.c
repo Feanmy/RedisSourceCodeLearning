@@ -40,16 +40,16 @@
  * the function takes care of it if needed. */
 /* 将元素插入到列表中 */
 void listTypePush(robj *subject, robj *value, int where) {
-    if (subject->encoding == OBJ_ENCODING_QUICKLIST) {  /* 判断是否为quicklist类型 */
-        int pos = (where == LIST_HEAD) ? QUICKLIST_HEAD : QUICKLIST_TAIL; /* 表头还是表尾插入 */
-        if (value->encoding == OBJ_ENCODING_INT) {  /* 插入元素是int类型 */
-            char buf[32];
-            ll2string(buf, 32, (long)value->ptr); /* 将int元素转为char数组
-                                                   * ll2string() 将long long转为string
-                                                   */
+    if (subject->encoding == OBJ_ENCODING_QUICKLIST) {                           /* 判断是否为quicklist类型 */
+        int pos = (where == LIST_HEAD) ? QUICKLIST_HEAD : QUICKLIST_TAIL;        /* 判断插入元素位置 表头或表尾 */
+        if (value->encoding == OBJ_ENCODING_INT) {                               /* 插入元素是int类型 */
+            char buf[32];                                                        /* 大小为32的字符数组 */
+            ll2string(buf, 32, (long)value->ptr);                            /* 将int元素转为char数组
+                                                                                  * ll2string() 将long long转为string
+                                                                                  */
             quicklistPush(subject->ptr, buf, strlen(buf), pos);
         } else {
-            quicklistPush(subject->ptr, value->ptr, sdslen(value->ptr), pos);
+            quicklistPush(subject->ptr, value->ptr, sdslen(value->ptr), pos);     /* 插入字符串类型元素 */
         }
     } else {
         serverPanic("Unknown list encoding");
