@@ -1608,8 +1608,8 @@ int incrementallyRehash(int dbid) {
  * for dict.c to resize the hash tables accordingly to the fact we have an
  * active fork child running. */
 void updateDictResizePolicy(void) {
-    if (!hasActiveChildProcess())
-        dictEnableResize();
+    if (!hasActiveChildProcess())      // 如果有子进程在运行时，禁用hash resize
+        dictEnableResize();            // 所以在rdb和aof重写时，不会进行rehash操作
     else
         dictDisableResize();
 }

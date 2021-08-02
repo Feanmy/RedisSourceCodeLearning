@@ -188,6 +188,7 @@ int _dictExpand(dict *d, unsigned long size, int* malloc_failed)
 }
 
 /* return DICT_ERR if expand was not performed */
+// 实现hash表扩容
 int dictExpand(dict *d, unsigned long size) {
     return _dictExpand(d, size, NULL);
 }
@@ -984,24 +985,25 @@ static int dictTypeExpandAllowed(dict *d) {
 }
 
 /* Expand the hash table if needed */
+// hash表扩容
 static int _dictExpandIfNeeded(dict *d)
 {
     /* Incremental rehashing already in progress. Return. */
-    if (dictIsRehashing(d)) return DICT_OK;
+    if (dictIsRehashing(d)) return DICT_OK; // 如果正在进行rehash操作，直接返回
 
     /* If the hash table is empty expand it to the initial size. */
-    if (d->ht[0].size == 0) return dictExpand(d, DICT_HT_INITIAL_SIZE);
+    if (d->ht[0].size == 0) return dictExpand(d, DICT_HT_INITIAL_SIZE); // 如果hash表示空的，初始化大小 4(M)
 
     /* If we reached the 1:1 ratio, and we are allowed to resize the hash
      * table (global setting) or we should avoid it but the ratio between
      * elements/buckets is over the "safe" threshold, we resize doubling
      * the number of buckets. */
-    if (d->ht[0].used >= d->ht[0].size &&
+    if (d->ht[0].used >= d->ht[0].size &&   // 已使用空间 >= hash表空间 同时hash表可以扩容(dict_can_resize)
         (dict_can_resize ||
-         d->ht[0].used/d->ht[0].size > dict_force_resize_ratio) &&
+         d->ht[0].used/d->ht[0].size > dict_force_resize_ratio) &&  // 已使用/总空间 > dict_force_resize_ratio
         dictTypeExpandAllowed(d))
     {
-        return dictExpand(d, d->ht[0].used + 1);
+        return dictExpand(d, d->ht[0].used + 1); // 满足以上条件，在现有使用空间大小基础上扩容1M
     }
     return DICT_OK;
 }
@@ -1009,9 +1011,9 @@ static int _dictExpandIfNeeded(dict *d)
 /* Our hash table capability is a power of two */
 static unsigned long _dictNextPower(unsigned long size)
 {
-    unsigned long i = DICT_HT_INITIAL_SIZE;
+    unsigned long i = DICT_HT_INITIAL_SIZE;  // 初始大小
 
-    if (size >= LONG_MAX) return LONG_MAX + 1LU;
+    if (size >= LONG_MAX) return LONG_MAX + 1LU; // 如果已达到最大值，则加1
     while(1) {
         if (i >= size)
             return i;
@@ -1059,11 +1061,11 @@ void dictEmpty(dict *d, void(callback)(void*)) {
 }
 
 void dictEnableResize(void) {
-    dict_can_resize = 1;
+    dict_can_resize = 1;  // 启用hash表resize
 }
 
 void dictDisableResize(void) {
-    dict_can_resize = 0;
+    dict_can_resize = 0; // 禁用hash表resize
 }
 
 uint64_t dictGetHash(dict *d, const void *key) {

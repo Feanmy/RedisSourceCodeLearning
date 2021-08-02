@@ -49,14 +49,14 @@
 #define DICT_NOTUSED(V) ((void) V)
 
 typedef struct dictEntry {  /* 字典条目 */
-    void *key;
+    void *key;              // hash键
     union {
         void *val;
         uint64_t u64;
         int64_t s64;
         double d;
-    } v;
-    struct dictEntry *next;
+    } v;                    // 存放hash值 联合体
+    struct dictEntry *next; // 指向下一个hash元素指针 实现链式哈希
 } dictEntry;
 
 typedef struct dictType {
@@ -73,8 +73,8 @@ typedef struct dictType {
  * implement incremental rehashing, for the old to the new table. */
 /* 每个字典都有2个hash结构，为了渐进式rehash */
 typedef struct dictht {
-    dictEntry **table;
-    unsigned long size;
+    dictEntry **table;        // 二维数组
+    unsigned long size;       // 哈希表大小
     unsigned long sizemask;
     unsigned long used;
 } dictht;
@@ -82,8 +82,8 @@ typedef struct dictht {
 typedef struct dict {
     dictType *type;
     void *privdata;
-    dictht ht[2];
-    long rehashidx; /* rehashing not in progress if rehashidx == -1 */
+    dictht ht[2];   // 定义两个hash表 交替使用 用于rehash操作
+    long rehashidx; /* rehashing not in progress if rehashidx == -1 */ // 是否在进行rehash操作 -1代表没有在rehash
     int16_t pauserehash; /* If >0 rehashing is paused (<0 indicates coding error) */
 } dict;
 
