@@ -1451,8 +1451,8 @@ struct redisServer {
     char *aof_filename;             /* Name of the AOF file AOF文件名称 */
     int aof_no_fsync_on_rewrite;    /* Don't fsync if a rewrite is in prog. AOF重写时不进行刷盘 */
     int aof_rewrite_perc;           /* Rewrite AOF if % growth is > M and... 当AOF文件增长百分比大于值时，触发重写 */
-    off_t aof_rewrite_min_size;     /* the AOF file is at least N bytes. */
-    off_t aof_rewrite_base_size;    /* AOF size on latest startup or rewrite. */
+    off_t aof_rewrite_min_size;     /* the AOF file is at least N bytes.  aof重写时，当前文件大小必须满足>=aof_rewrite_min_size */
+    off_t aof_rewrite_base_size;    /* AOF size on latest startup or rewrite. 记录最近一次启动或重启后的aof大小 */
     off_t aof_current_size;         /* AOF current size. */
     off_t aof_fsync_offset;         /* AOF offset which is already synced to disk. */
     int aof_flush_sleep;            /* Micros to sleep before flush. (used by tests) 在flush之前的休眠时间,微秒 */

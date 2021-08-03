@@ -2188,6 +2188,11 @@ int serverCron(struct aeEventLoop *eventLoop, long long id, void *clientData) {
         }
 
         /* Trigger an AOF rewrite if needed. */
+        // aof重写触发条件
+        // 1. AOF重写机制启用
+        // 2. 没有子进程在运行
+        // 3. 当前aof大小 > aof_rewrite_min_size
+        // 4. 设置并满足了增长比
         if (server.aof_state == AOF_ON &&
             !hasActiveChildProcess() &&
             server.aof_rewrite_perc &&
