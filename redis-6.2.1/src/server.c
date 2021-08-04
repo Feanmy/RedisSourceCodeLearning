@@ -2192,7 +2192,7 @@ int serverCron(struct aeEventLoop *eventLoop, long long id, void *clientData) {
         // 1. AOF重写机制启用
         // 2. 没有子进程在运行
         // 3. 当前aof大小 > aof_rewrite_min_size
-        // 4. 设置并满足了增长比
+        // 4. 设置并满足了增长比  问题: 如果增长比设置为0 是不是就不会触发重写
         if (server.aof_state == AOF_ON &&
             !hasActiveChildProcess() &&
             server.aof_rewrite_perc &&

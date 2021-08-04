@@ -40,7 +40,7 @@ extern const char *SDS_NOINIT;
 #include <stdarg.h>
 #include <stdint.h>
 
-typedef char *sds;  // sds是一个char类型的指针
+typedef char *sds;  // sds是一个char类型的指针 char*
 
 /* 基础知识：二进制数是从左至右读
  * 最高位是msb，最右是lsb */
@@ -48,7 +48,8 @@ typedef char *sds;  // sds是一个char类型的指针
 /* Note: sdshdr5 is never used, we just access the flags byte directly.
  * However is here to document the layout of type 5 SDS strings. */
 
-/* 都是3个低位保存类型 */
+/* sdshdr5 结构头 */
+/* 都是3个低位保存类型 __packed__ 设置内存对齐 */
 struct __attribute__ ((__packed__)) sdshdr5 {
     unsigned char flags; /* 3 lsb of type, and 5 msb of string length 3个低位存储类型 5个高位存储长度 */
     char buf[]; // buf是个柔性数组
@@ -57,25 +58,25 @@ struct __attribute__ ((__packed__)) sdshdr5 {
 /* 以下结构体的相同点：flags都是低3位存储类型，高5位保留不使用
  * 不同点：len和alloc的类型不同 */
 struct __attribute__ ((__packed__)) sdshdr8 {  /* packed作用是字节对齐：按1字节对齐 */
-    uint8_t len; /* used 已使用长度 */
+    uint8_t len; /* used 已使用长度 */  // typedef unsigned char uint8_t
     uint8_t alloc; /* excluding the header and null terminator 实际分配的长度 */
     unsigned char flags; /* 3 lsb of type, 5 unused bits */
     char buf[];
 };
 struct __attribute__ ((__packed__)) sdshdr16 {
-    uint16_t len; /* used */
+    uint16_t len; /* used */   // typedef unsigned short uint16_t  16位 2个字节
     uint16_t alloc; /* excluding the header and null terminator */
     unsigned char flags; /* 3 lsb of type, 5 unused bits */
     char buf[];
 };
 struct __attribute__ ((__packed__)) sdshdr32 {
-    uint32_t len; /* used */
+    uint32_t len; /* used */  // typedef unsigned int uint32_t
     uint32_t alloc; /* excluding the header and null terminator */
     unsigned char flags; /* 3 lsb of type, 5 unused bits */
     char buf[];
 };
 struct __attribute__ ((__packed__)) sdshdr64 {
-    uint64_t len; /* used */
+    uint64_t len; /* used */ // typedef unsigned long long uint64_t 8个字节
     uint64_t alloc; /* excluding the header and null terminator */
     unsigned char flags; /* 3 lsb of type, 5 unused bits */
     char buf[];
@@ -98,7 +99,7 @@ static inline size_t sdslen(const sds s) { /* 获取s的长度 s是直接指向�
     /* 初步理解：s是指向buf数组，s[-1]是指向buf之前的flags(通过flags的低3位可以拿到类型) */
     switch(flags&SDS_TYPE_MASK) {
         case SDS_TYPE_5:
-            return SDS_TYPE_5_LEN(flags);
+            return SDS_TYPE_5_LEN(flags);  // sdshdr5中的flags存放了长度
         case SDS_TYPE_8:
             return SDS_HDR(8,s)->len;
         case SDS_TYPE_16:
