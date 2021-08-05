@@ -499,19 +499,21 @@ unsigned long zslGetRank(zskiplist *zsl, double score, sds ele) {
 }
 
 /* Finds an element by its rank. The rank argument needs to be 1-based. */
+// 根据排名查找元素
 zskiplistNode* zslGetElementByRank(zskiplist *zsl, unsigned long rank) {
     zskiplistNode *x;
     unsigned long traversed = 0;
     int i;
 
-    x = zsl->header;
-    for (i = zsl->level-1; i >= 0; i--) {
+    x = zsl->header; // 跳表头节点
+    for (i = zsl->level-1; i >= 0; i--) { // 从跳表的最高层遍历
+        // 如果有下一个节点 且跨度小于排名 继续查找过程
         while (x->level[i].forward && (traversed + x->level[i].span) <= rank)
         {
             traversed += x->level[i].span;
             x = x->level[i].forward;
         }
-        if (traversed == rank) {
+        if (traversed == rank) {  // 到达查找的边界 查找结束 返回
             return x;
         }
     }
@@ -1180,19 +1182,19 @@ void zsetConvert(robj *zobj, int encoding) {
     double score;
 
     if (zobj->encoding == encoding) return;
-    if (zobj->encoding == OBJ_ENCODING_ZIPLIST) {
+    if (zobj->encoding == OBJ_ENCODING_ZIPLIST) {  // 判断有序集合的内部编码是否为ziplist
         unsigned char *zl = zobj->ptr;
         unsigned char *eptr, *sptr;
         unsigned char *vstr;
         unsigned int vlen;
         long long vlong;
 
-        if (encoding != OBJ_ENCODING_SKIPLIST)
+        if (encoding != OBJ_ENCODING_SKIPLIST)     // 如果传入的encoding不是跳表 报系统异常
             serverPanic("Unknown target encoding");
 
-        zs = zmalloc(sizeof(*zs));
-        zs->dict = dictCreate(&zsetDictType,NULL);
-        zs->zsl = zslCreate();
+        zs = zmalloc(sizeof(*zs));                             // 分配内存空间
+        zs->dict = dictCreate(&zsetDictType,NULL);  // 创建哈希表
+        zs->zsl = zslCreate();                                //  创建跳表
 
         eptr = ziplistIndex(zl,0);
         serverAssertWithInfo(NULL,zobj,eptr != NULL);

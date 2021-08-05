@@ -58,12 +58,13 @@ static inline int sdsHdrSize(char type) {  /* 返回sds结构体大小 */
     return 0;
 }
 
+// 根据长度返回类型
 static inline char sdsReqType(size_t string_size) {  /* 根据给定长度值返回类型 */
-    if (string_size < 1<<5)  // 1<<5左移5位: 1*2^5=36
+    if (string_size < 1<<5)  // 1<<5左移5位: 1*2^5=32
         return SDS_TYPE_5;
-    if (string_size < 1<<8)  // 1<<8左移8位: 1*2^8=288
+    if (string_size < 1<<8)  // 1<<8左移8位: 1*2^8=256
         return SDS_TYPE_8;
-    if (string_size < 1<<16) // 1<<16左移16位: 1*2^16=82944
+    if (string_size < 1<<16) // 1<<16左移16位: 1*2^16=65536
         return SDS_TYPE_16;
 #if (LONG_MAX == LLONG_MAX)
     if (string_size < 1ll<<32) // 1ll是什么鬼 Long Long

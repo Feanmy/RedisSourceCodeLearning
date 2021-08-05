@@ -71,8 +71,9 @@ static void _dictReset(dict *ht) {
 }
 
 /* Create a new hash table */
+// 创建一个新的哈希表
 static dict *dictCreate(dictType *type, void *privDataPtr) {
-    dict *ht = hi_malloc(sizeof(*ht));
+    dict *ht = hi_malloc(sizeof(*ht));   // 分配内存空间
     if (ht == NULL)
         return NULL;
 
