@@ -107,46 +107,48 @@ void zslFreeNode(zskiplistNode *node) {
 void zslFree(zskiplist *zsl) {
     zskiplistNode *node = zsl->header->level[0].forward, *next;
 
-    zfree(zsl->header);  /* 释放表头结点 */
-    while(node) {        /* 循环释放其他结点 */
-        next = node->level[0].forward;   /* next指向当前结点的前向结点 */
-        zslFreeNode(node);               /* 释放当前结点 */
-        node = next;                     /* 将 next 指向的结点作为下一个需要释放处理的结点 */
+    zfree(zsl->header);  /* 释放表头节点 */
+    while(node) {        /* 循环释放其他节点 */
+        next = node->level[0].forward;   /* next指向当前节点的前向节点 */
+        zslFreeNode(node);               /* 释放当前节点 */
+        node = next;                     /* 将 next 指向的节点作为下一个需要释放处理的节点 */
     }
-    zfree(zsl);
+    zfree(zsl);                          /* 所有节点释放之后，释放表空间 */
 }
 
 /* Returns a random level for the new skiplist node we are going to create.
  * The return value of this function is between 1 and ZSKIPLIST_MAXLEVEL
  * (both inclusive), with a powerlaw-alike distribution where higher
  * levels are less likely to be returned. */
+/* 为新增的表节点生成一个随机的层数 */
 int zslRandomLevel(void) {
     int level = 1;
     while ((random()&0xFFFF) < (ZSKIPLIST_P * 0xFFFF))
         level += 1;
-    return (level<ZSKIPLIST_MAXLEVEL) ? level : ZSKIPLIST_MAXLEVEL;
+    return (level<ZSKIPLIST_MAXLEVEL) ? level : ZSKIPLIST_MAXLEVEL;  /* ZSKIPLIST_MAXLEVEL: 32 */
 }
 
 /* Insert a new node in the skiplist. Assumes the element does not already
  * exist (up to the caller to enforce that). The skiplist takes ownership
  * of the passed SDS string 'ele'. */
+/* 向跳跃表插入一个新的节点 */
 zskiplistNode *zslInsert(zskiplist *zsl, double score, sds ele) {
     zskiplistNode *update[ZSKIPLIST_MAXLEVEL], *x;
     unsigned int rank[ZSKIPLIST_MAXLEVEL];
     int i, level;
 
     serverAssert(!isnan(score));
-    x = zsl->header;
-    for (i = zsl->level-1; i >= 0; i--) {
+    x = zsl->header;                                          /* x指向表的头节点 */
+    for (i = zsl->level-1; i >= 0; i--) {                     /* 从高层向下遍历 */
         /* store rank that is crossed to reach the insert position */
         rank[i] = i == (zsl->level-1) ? 0 : rank[i+1];
-        while (x->level[i].forward &&
-                (x->level[i].forward->score < score ||
-                    (x->level[i].forward->score == score &&
+        while (x->level[i].forward &&                         /* 头节点第i层存在前向节点 */
+                (x->level[i].forward->score < score ||        /* i层前向节点的分数 小于 要新增的分数 */
+                    (x->level[i].forward->score == score &&   /* i层前向节点分数与新增元素分数相等，然后对前向节点元素与新增元素进行字典序比较 */
                     sdscmp(x->level[i].forward->ele,ele) < 0)))
         {
             rank[i] += x->level[i].span;
-            x = x->level[i].forward;
+            x = x->level[i].forward;                          /* 继续比较下一个节点 */
         }
         update[i] = x;
     }
@@ -154,8 +156,8 @@ zskiplistNode *zslInsert(zskiplist *zsl, double score, sds ele) {
      * scores, reinserting the same element should never happen since the
      * caller of zslInsert() should test in the hash table if the element is
      * already inside or not. */
-    level = zslRandomLevel();
-    if (level > zsl->level) {
+    level = zslRandomLevel();    /* 随机一个层高 */
+    if (level > zsl->level) {    /* 随机大于当前表层高 */
         for (i = zsl->level; i < level; i++) {
             rank[i] = 0;
             update[i] = zsl->header;
