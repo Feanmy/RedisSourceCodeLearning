@@ -107,11 +107,11 @@ void zslFreeNode(zskiplistNode *node) {
 void zslFree(zskiplist *zsl) {
     zskiplistNode *node = zsl->header->level[0].forward, *next;
 
-    zfree(zsl->header);
-    while(node) {
-        next = node->level[0].forward;
-        zslFreeNode(node);
-        node = next;
+    zfree(zsl->header);  /* 释放表头结点 */
+    while(node) {        /* 循环释放其他结点 */
+        next = node->level[0].forward;   /* next指向当前结点的前向结点 */
+        zslFreeNode(node);               /* 释放当前结点 */
+        node = next;                     /* 将 next 指向的结点作为下一个需要释放处理的结点 */
     }
     zfree(zsl);
 }
