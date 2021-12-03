@@ -6056,8 +6056,9 @@ int iAmMaster(void) {
             (server.cluster_enabled && nodeIsMaster(server.cluster->myself)));
 }
 
+/* 程序执行入口 */
 int main(int argc, char **argv) {
-    struct timeval tv;
+    struct timeval tv;     /* 成员：秒、微秒 */
     int j;
     char config_from_stdin = 0;
 
@@ -6094,7 +6095,7 @@ int main(int argc, char **argv) {
     spt_init(argc, argv);
 #endif
     setlocale(LC_COLLATE,"");
-    tzset(); /* Populates 'timezone' global. */
+    tzset(); /* Populates 'timezone' global. */  /* 设置时区 */
     zmalloc_set_oom_handler(redisOutOfMemoryHandler);
     srand(time(NULL)^getpid());
     srandom(time(NULL)^getpid());
@@ -6121,14 +6122,14 @@ int main(int argc, char **argv) {
     /* Store the executable path and arguments in a safe place in order
      * to be able to restart the server later. */
     server.executable = getAbsolutePath(argv[0]);
-    server.exec_argv = zmalloc(sizeof(char*)*(argc+1));
+    server.exec_argv = zmalloc(sizeof(char*)*(argc+1));  /* 分配存储参数的内存空间 */
     server.exec_argv[argc] = NULL;
     for (j = 0; j < argc; j++) server.exec_argv[j] = zstrdup(argv[j]);
 
     /* We need to init sentinel right now as parsing the configuration file
      * in sentinel mode will have the effect of populating the sentinel
      * data structures with master nodes to monitor. */
-    if (server.sentinel_mode) {
+    if (server.sentinel_mode) {   /* 如果是以哨兵模式启动 */
         initSentinelConfig();
         initSentinel();
     }
@@ -6137,7 +6138,7 @@ int main(int argc, char **argv) {
      * the program main. However the program is part of the Redis executable
      * so that we can easily execute an RDB check on loading errors. */
     if (strstr(argv[0],"redis-check-rdb") != NULL)
-        redis_check_rdb_main(argc,argv,NULL);
+        redis_check_rdb_main(argc,argv,NULL);   /* 执行检查rdb */
     else if (strstr(argv[0],"redis-check-aof") != NULL)
         redis_check_aof_main(argc,argv);
 
@@ -6294,7 +6295,7 @@ int main(int argc, char **argv) {
 
     redisSetCpuAffinity(server.server_cpulist);
     setOOMScoreAdj(-1);
-
+    /* 网络事件 */
     aeMain(server.el);
     aeDeleteEventLoop(server.el);
     return 0;
